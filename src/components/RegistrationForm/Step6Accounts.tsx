@@ -206,25 +206,25 @@ export default function Step6Accounts({
                   <span className="font-bold">Welcome back, {existingUser.name}!</span> We found an existing account with this email. Please enter your password to add this new library to your account.
                 </p>
                 {!isVerified ? (
-                  <div className="flex gap-2 items-start">
-                    <div className="flex-1">
+                  <div>
+                    <div className="relative flex items-center">
                       <input
                         type="password"
                         placeholder="Enter your current password"
                         value={verifyPassword}
                         onChange={e => setVerifyPassword(e.target.value)}
-                        className="block w-full rounded-md border border-brand-200 px-3 py-2 shadow-sm focus:border-brand-500 focus:ring-brand-500"
+                        className="block w-full rounded-xl border border-brand-200 pl-4 pr-24 py-3 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm transition-all bg-white"
                       />
-                      {verifyError && <p className="text-xs text-red-500 mt-1">{verifyError}</p>}
+                      <button
+                        type="button"
+                        onClick={handleVerify}
+                        disabled={!verifyPassword || verifying}
+                        className="absolute right-1.5 top-1.5 bottom-1.5 bg-brand-600 text-white px-4 rounded-lg text-sm font-bold hover:bg-brand-700 disabled:opacity-50 disabled:bg-gray-400 transition-colors shadow-sm"
+                      >
+                        {verifying ? 'Verifying' : 'Verify'}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleVerify}
-                      disabled={!verifyPassword || verifying}
-                      className="bg-brand-600 text-white px-4 py-2 rounded-md font-medium hover:bg-brand-700 disabled:opacity-50"
-                    >
-                      {verifying ? 'Verifying...' : 'Verify'}
-                    </button>
+                    {verifyError && <p className="text-xs text-red-500 mt-2 font-medium pl-1">{verifyError}</p>}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-green-600 font-bold bg-green-50 p-2 rounded border border-green-100">
