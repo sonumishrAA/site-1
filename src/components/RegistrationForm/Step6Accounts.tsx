@@ -210,6 +210,8 @@ export default function Step6Accounts({
                     <div className="relative flex items-center">
                       <input
                         type="password"
+                        name="verify_existing_pwd"
+                        autoComplete="new-password"
                         placeholder="Enter your current password"
                         value={verifyPassword}
                         onChange={e => setVerifyPassword(e.target.value)}
