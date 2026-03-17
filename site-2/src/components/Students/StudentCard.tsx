@@ -60,7 +60,7 @@ export default function StudentCard({ student }: { student: Student }) {
           WhatsApp
         </a>
         <Link
-          href={`/students/${student.id}`}
+          href={`/students/profile/?id=${student.id}`}
           className="flex items-center justify-center gap-2 bg-brand-500 text-white p-2 rounded-xl font-bold text-[10px] uppercase shadow-sm shadow-brand-100"
         >
           Details
