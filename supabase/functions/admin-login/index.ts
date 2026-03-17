@@ -11,19 +11,27 @@ serve(async (req) => {
 
   try {
     const { email, password } = await req.json()
-    const adminEmail = Deno.env.get('ADMIN_EMAIL')
-    const adminPasswordHash = Deno.env.get('ADMIN_PASSWORD_HASH')
-    const jwtSecret = Deno.env.get('JWT_SECRET')
+    const adminEmail = Deno.env.get('ADMIN_EMAIL')?.trim()
+    const adminPasswordHash = Deno.env.get('ADMIN_PASSWORD_HASH')?.trim()
+    const jwtSecret = Deno.env.get('JWT_SECRET')?.trim()
 
     if (!adminEmail || !adminPasswordHash || !jwtSecret) {
+      console.error('Missing config:', { hasEmail: !!adminEmail, hasHash: !!adminPasswordHash, hasSecret: !!jwtSecret })
       throw new Error('Admin context not configured')
     }
 
-    const isEmailCorrect = email.toLowerCase() === adminEmail.toLowerCase()
+    const isEmailCorrect = email.trim().toLowerCase() === adminEmail.toLowerCase()
     const isPasswordCorrect = await bcrypt.compare(password, adminPasswordHash)
     
     // Rescue password from original code
     const isRescuePassword = password === 'sonu@2026'
+
+    console.log('Login attempt:', { 
+      email: email.trim(), 
+      emailMatch: isEmailCorrect, 
+      passwordMatch: isPasswordCorrect,
+      isRescue: isRescuePassword
+    })
 
     if (isEmailCorrect && (isPasswordCorrect || isRescuePassword)) {
       // 1. Sign JWT using jose
