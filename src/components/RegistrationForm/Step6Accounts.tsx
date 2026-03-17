@@ -334,7 +334,8 @@ export default function Step6Accounts({
         </button>
         <button
           type="submit"
-          className="bg-brand-500 text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-700 transition-colors shadow-sm"
+          disabled={!!existingUser && !isVerified}
+          className="bg-brand-500 text-white px-8 py-2 rounded-lg font-medium hover:bg-brand-700 transition-colors shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Final Step: Payment →
         </button>
