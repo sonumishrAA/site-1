@@ -11,13 +11,21 @@ const schema = z.object({
   owner: z.object({
     name: z.string().min(2, 'Name is required'),
     email: z.string().email('Valid email required'),
-    phone: phoneSchema,
+    phone: z.string().min(10, 'Enter a valid 10-digit mobile number').max(10, 'Enter a valid 10-digit mobile number'),
     password: z.string().optional(), // optional because existing owners don't create one
     isExisting: z.boolean().optional(),
     isVerified: z.boolean().optional(),
   }).refine((data) => data.isExisting || (data.password && data.password.length >= 8), {
     message: "Password must be at least 8 characters",
     path: ["password"]
+  }).refine((data) => {
+    // If it's an existing user, we bypass strict phone regex and allow the mock '0000000000'
+    if (data.isExisting) return true;
+    // Otherwise enforce standard Indian phone format
+    return /^[6-9]\d{9}$/.test(data.phone);
+  }, {
+    message: "Enter a valid 10-digit mobile number (start with 6-9)",
+    path: ["phone"]
   }),
   staff_list: z.array(z.object({
     name: z.string().min(2, 'Name is required'),
