@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { RegistrationData } from './RegistrationForm'
 import Script from 'next/script'
 import { callEdgeFunction } from '@/lib/api'
-import { supabaseBrowser } from '@/lib/supabase/browser'
+import { supabaseBrowser } from '@/lib/supabase/client'
 
 interface DBPlan {
   plan: string
