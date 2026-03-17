@@ -22,6 +22,7 @@ export async function callEdgeFunction(
   const isFormData = body instanceof FormData
   
   const allHeaders: Record<string, string> = {
+    'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
     ...headers,
   }
 
@@ -34,6 +35,11 @@ export async function callEdgeFunction(
     if (token) {
       allHeaders['Authorization'] = `Bearer ${token}`
     }
+  }
+
+  // Fallback Authorization if not set (for public protected functions)
+  if (!allHeaders['Authorization'] && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    allHeaders['Authorization'] = `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
   }
 
   const res = await fetch(url, {
