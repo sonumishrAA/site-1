@@ -41,10 +41,14 @@ export async function PATCH(req: NextRequest) {
       .eq('plan', plan)
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase update error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json(data[0])
-  } catch (error) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  } catch (error: any) {
+    console.error('Failed to update pricing:', error);
+    return NextResponse.json({ error: error.message || 'Failed to update pricing' }, { status: 500 })
   }
 }
