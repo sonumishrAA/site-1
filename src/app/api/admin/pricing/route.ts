@@ -23,18 +23,21 @@ export async function PATCH(req: NextRequest) {
   try {
     await getAdminFromRequest(req)
     
-    const { plan, amount } = await req.json()
+    const { plan, amount, duration_minutes } = await req.json()
 
-    if (!plan || amount === undefined) {
-      return NextResponse.json({ error: 'Plan and amount are required' }, { status: 400 })
+    if (!plan) {
+      return NextResponse.json({ error: 'Plan is required' }, { status: 400 })
     }
+
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    }
+    if (amount !== undefined) updateData.amount = amount
+    if (duration_minutes !== undefined) updateData.duration_minutes = duration_minutes
 
     const { data, error } = await supabaseService
       .from('pricing_config')
-      .update({ 
-        amount,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('plan', plan)
       .select()
 

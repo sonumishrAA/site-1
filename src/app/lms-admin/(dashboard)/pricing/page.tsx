@@ -8,7 +8,8 @@ import {
   RefreshCw,
   Clock,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Timer
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -16,6 +17,7 @@ interface PricingPlan {
   id: number
   plan: string
   amount: number
+  duration_minutes: number
   updated_at?: string
 }
 
@@ -47,13 +49,17 @@ export default function PricingControl() {
     setPlans(prev => prev.map(p => p.plan === plan ? { ...p, amount: parseInt(value) || 0 } : p))
   }
 
-  const savePrice = async (plan: string, amount: number) => {
+  const handleDurationChange = (plan: string, value: string) => {
+    setPlans(prev => prev.map(p => p.plan === plan ? { ...p, duration_minutes: parseInt(value) || 0 } : p))
+  }
+
+  const savePlan = async (plan: string, amount: number, duration_minutes: number) => {
     setIsSaving(plan)
     try {
       const res = await fetch('/api/admin/pricing', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, amount })
+        body: JSON.stringify({ plan, amount, duration_minutes })
       })
       
       if (res.ok) {
@@ -75,7 +81,6 @@ export default function PricingControl() {
     
     setIsCleaning(true)
     try {
-      // Assuming a cron/cleanup endpoint exists
       const res = await fetch('/api/cron/data-cleanup', {
         headers: { 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET}` }
       })
@@ -89,10 +94,10 @@ export default function PricingControl() {
   }
 
   return (
-    <div className="space-y-10 max-w-4xl">
+    <div className="space-y-10 max-w-5xl">
       <header>
         <h1 className="text-3xl font-serif text-brand-900 mb-1">Pricing Control</h1>
-        <p className="text-gray-500 font-medium">Changes apply immediately to all new registrations and renewals.</p>
+        <p className="text-gray-500 font-medium">Configure plan prices and exact durations for testing and production.</p>
       </header>
 
       {notification && (
@@ -105,70 +110,85 @@ export default function PricingControl() {
       <div className="bg-amber-50 border-l-[4px] border-amber-600 p-6 rounded-r-2xl">
         <div className="flex gap-4">
           <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0" />
-          <p className="text-sm text-amber-800 leading-relaxed">
-            <span className="font-bold">Important Notice:</span> Price changes do <span className="font-bold">NOT</span> affect existing active subscriptions. Only new registrations and renewals will use the new price points.
-          </p>
+          <div>
+            <p className="text-sm text-amber-800 leading-relaxed">
+              <span className="font-bold">Testing Note:</span> You can set <span className="font-bold text-red-600 uppercase tracking-tight">duration in minutes</span> to test expiration instantly.
+            </p>
+            <p className="text-[11px] text-amber-700/70 mt-1 italic">
+              * 1 Month ≈ 43200 min | 1 Day = 1440 min | 10 Min = 10
+            </p>
+          </div>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50/50 border-b border-gray-100">
-              <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Plan</th>
-              <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-center">Current Price</th>
-              <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">New Price (₹)</th>
-              <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Last Changed</th>
-              <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {isLoading ? (
-              [...Array(4)].map((_, i) => (
-                <tr key={i} className="animate-pulse">
-                  <td colSpan={5} className="px-8 py-6 h-16 bg-gray-50/20"></td>
-                </tr>
-              ))
-            ) : (
-              plans.map((plan) => (
-                <tr key={plan.id} className="hover:bg-gray-50/30 transition-colors">
-                  <td className="px-8 py-6">
-                    <span className="text-sm font-bold text-brand-900 uppercase tracking-tight">{plan.plan === '1m' ? '1 Month' : plan.plan === '3m' ? '3 Months' : plan.plan === '6m' ? '6 Months' : '12 Months'}</span>
-                  </td>
-                  <td className="px-8 py-6 text-center">
-                    <span className="text-sm font-mono font-bold text-gray-600">₹{plan.amount}</span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <input 
-                      type="number"
-                      min="0"
-                      step="50"
-                      value={plan.amount}
-                      onChange={(e) => handlePriceChange(plan.plan, e.target.value)}
-                      className="w-28 px-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
-                    />
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                      <Clock className="w-3.5 h-3.5" />
-                      {plan.updated_at ? format(new Date(plan.updated_at), 'd MMM yyyy') : 'Never changed'}
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button 
-                      onClick={() => savePrice(plan.plan, plan.amount)}
-                      disabled={isSaving !== null}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg text-xs font-bold hover:bg-brand-900 transition-all shadow-sm active:scale-95 disabled:opacity-50"
-                    >
-                      {isSaving === plan.plan ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                      Save
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100">
+                <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Plan Key</th>
+                <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-center">Current Price</th>
+                <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Price (₹)</th>
+                <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest">Duration (Minutes)</th>
+                <th className="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {isLoading ? (
+                [...Array(4)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td colSpan={5} className="px-8 py-6 h-16 bg-gray-50/20"></td>
+                  </tr>
+                ))
+              ) : (
+                plans.map((plan) => (
+                  <tr key={plan.id} className="hover:bg-gray-50/30 transition-colors">
+                    <td className="px-8 py-6">
+                      <span className="text-sm font-black text-brand-900 uppercase tracking-widest">{plan.plan}</span>
+                    </td>
+                    <td className="px-8 py-6 text-center">
+                      <span className="text-sm font-mono font-bold text-gray-600">₹{plan.amount}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="relative w-28">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">₹</span>
+                        <input 
+                          type="number"
+                          min="0"
+                          value={plan.amount}
+                          onChange={(e) => handlePriceChange(plan.plan, e.target.value)}
+                          className="w-full pl-6 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="relative w-32">
+                        <Timer className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+                        <input 
+                          type="number"
+                          min="1"
+                          value={plan.duration_minutes}
+                          onChange={(e) => handleDurationChange(plan.plan, e.target.value)}
+                          className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button 
+                        onClick={() => savePlan(plan.plan, plan.amount, plan.duration_minutes)}
+                        disabled={isSaving !== null}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-900 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                      >
+                        {isSaving === plan.plan ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                        Save
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="pt-10 border-t border-gray-100">
