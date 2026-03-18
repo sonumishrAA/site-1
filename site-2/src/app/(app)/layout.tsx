@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getActiveLibraryId } from '@/lib/getActiveLibrary'
 
+export const runtime = 'edge';
+
 export default async function AppLayout({
   children,
 }: {
