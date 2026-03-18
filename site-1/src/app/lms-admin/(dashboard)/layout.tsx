@@ -10,8 +10,7 @@ import {
   LogOut,
   BookOpen
 } from 'lucide-react'
-import { useRouter, usePathname } from 'next/navigation'
-import { isAdminTokenValid } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardLayout({
   children,
@@ -19,18 +18,19 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const pathname = usePathname()
   const [adminEmail, setAdminEmail] = useState('admin@libraryos.in')
   const [isAuthChecked, setIsAuthChecked] = useState(false)
 
   useEffect(() => {
-    // Guard: check if admin token exists AND is not expired
-    if (!isAdminTokenValid()) {
-      router.replace('/lms-admin/login?expired=1')
+    // Guard: run only once on mount — check if token exists
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      router.replace('/lms-admin/login')
       return
     }
     setIsAuthChecked(true)
-  }, [pathname, router])
+    // Note: expired tokens are handled by callEdgeFunction's 401 handler in api.ts
+  }, []) // empty deps — only run once on mount, NOT on every render
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token')
