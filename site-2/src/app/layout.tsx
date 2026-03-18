@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import { type Metadata, type Viewport } from "next";
 import { DM_Sans, DM_Serif_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -41,21 +41,18 @@ export const viewport: Viewport = {
 };
 
 import AuthGuard from "@/components/AuthGuard";
-import { cookies } from "next/headers";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const activeLibId = cookieStore.get("active_library_id")?.value;
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${dmSans.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        <AuthGuard activeLibId={activeLibId}>
+        <AuthGuard>
           {children}
         </AuthGuard>
       </body>
