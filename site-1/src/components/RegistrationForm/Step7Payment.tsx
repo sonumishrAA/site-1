@@ -88,9 +88,11 @@ export default function Step7Payment({
         }
       })
 
+      const RZP_KEY = 'rzp_live_SRSc8DqXsmduW6'  // Public key — safe to hardcode
+
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_your_key', // Ensure this is in your env
-        amount: amount * 100,
+        key: RZP_KEY,
+        amount: amount * 100, // amount from edge fn is in rupees, Razorpay needs paise
         currency: 'INR',
         name: 'LibraryOS',
         description: `Library Registration - ${selectedPlan.label}`,
