@@ -9,7 +9,7 @@ export async function setActiveLibrary(libraryId: string) {
   cookieStore.set('active_library_id', libraryId, {
     path: '/',
     maxAge: 60 * 60 * 24 * 30, // 30 days
-    httpOnly: true,
+    httpOnly: false,
     sameSite: 'lax',
   })
   revalidatePath('/', 'layout')

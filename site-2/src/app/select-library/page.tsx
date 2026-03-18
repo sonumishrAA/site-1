@@ -8,6 +8,7 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import { Building2, CheckCircle2, AlertTriangle, Clock, ChevronRight, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { callEdgeFunction } from '@/lib/api'
+import { setActiveLibrary } from '@/app/actions'
 
 interface Library {
   id: string
@@ -99,9 +100,8 @@ export default function SelectLibraryPage() {
       alert('This library is expired. Only the owner can renew it.')
       return
     }
-
-    // Set the active library & go to home — AuthGuard handles expiry inline
-    document.cookie = `active_library_id=${lib.id}; path=/; max-age=2592000`
+    // Set the active library via server action to override any httpOnly cookies
+    await setActiveLibrary(lib.id)
     router.push('/')
   }
 
