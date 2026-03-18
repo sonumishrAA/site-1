@@ -72,14 +72,8 @@ export async function callEdgeFunction(
   })
 
   if (!res.ok) {
-    // If the admin token is expired/invalid, clear it and force re-login
-    if (res.status === 401 && useAdminToken) {
-      localStorage.removeItem('admin_token')
-      window.location.href = '/lms-admin/login?expired=1'
-      throw new Error('Session expired. Please log in again.')
-    }
     const data = await res.json().catch(() => ({}))
-    throw new Error(data.error || 'Request failed')
+    throw new Error(data.error || `Request failed (${res.status})`)
   }
 
   return res.json()
