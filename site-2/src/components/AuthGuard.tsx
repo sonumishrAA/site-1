@@ -284,11 +284,20 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         if (!isBypass) {
           const libraryIds: string[] = staff?.library_ids || []
 
-          if (libraryIds.length > 1 && !Cookies.get('active_library_id')) {
+          // Read cookie directly (more reliable than js-cookie on navigation)
+          const getCookie = (name: string) => {
+            if (typeof document === 'undefined') return null
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+            return match ? match[2] : null
+          }
+
+          const activeCookieId = getCookie('active_library_id')
+
+          if (libraryIds.length > 1 && !activeCookieId) {
             router.push('/select-library'); return
           }
 
-          const selectedLibId = Cookies.get('active_library_id') || libraryIds[0]
+          const selectedLibId = activeCookieId || libraryIds[0]
 
           if (selectedLibId) {
             const { data: library } = await supabase
