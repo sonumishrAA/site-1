@@ -10,7 +10,7 @@ import {
   LogOut,
   BookOpen
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function DashboardLayout({
   children,
@@ -18,16 +18,32 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [adminEmail, setAdminEmail] = useState('admin@libraryos.in')
+  const [isAuthChecked, setIsAuthChecked] = useState(false)
 
   useEffect(() => {
-    // We could potentially decode the token to get the email here
-    // But for now, using the default is fine for a static UI
-  }, [])
+    // Guard: if no admin token, redirect to login immediately
+    const token = localStorage.getItem('admin_token')
+    if (!token) {
+      router.replace('/lms-admin/login')
+      return
+    }
+    setIsAuthChecked(true)
+  }, [pathname, router])
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token')
     router.push('/lms-admin/login')
+  }
+
+  // Don't render anything until auth is confirmed — prevents edge function calls with no token
+  if (!isAuthChecked) {
+    return (
+      <div className="min-h-screen bg-[#0F1F5C] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white/50" />
+      </div>
+    )
   }
 
   return (
