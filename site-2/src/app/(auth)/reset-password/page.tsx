@@ -1,5 +1,7 @@
 'use client'
 
+export const runtime = "edge";
+
 import { useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
