@@ -1,3 +1,5 @@
+project_id = "zlhivlrapbhhkyrljueg"
+
 [functions]
 admin-login = { verify_jwt = false }
 check-email = { verify_jwt = false }
@@ -8,15 +10,15 @@ verify-payment = { verify_jwt = false }
 verify-renewal = { verify_jwt = false }
 verify-token = { verify_jwt = false }
 generate-token = { verify_jwt = false }
+update-pricing = { verify_jwt = false }
+create-payment-order = { verify_jwt = false }
+create-renewal-order = { verify_jwt = false }
 
 # Protected functions
 admin-libraries = { verify_jwt = true }
 admin-messages = { verify_jwt = true }
 delete-library = { verify_jwt = true }
-update-pricing = { verify_jwt = true }
 import-students = { verify_jwt = true }
 get-dashboard-stats = { verify_jwt = true }
 clear-password-flag = { verify_jwt = true }
 verify-owner-password = { verify_jwt = true }
-create-payment-order = { verify_jwt = true }
-create-renewal-order = { verify_jwt = true }
